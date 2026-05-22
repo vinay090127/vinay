@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Signup</title>
+<title>Grocery List App</title>
 
 <style>
 
@@ -15,11 +15,11 @@
 }
 
 body{
-    background:linear-gradient(135deg,#d50c1d,#8f94fb);
+    background:linear-gradient(135deg,#11998e,#38ef7d);
+    min-height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
-    min-height:100vh;
     padding:20px;
 }
 
@@ -34,7 +34,7 @@ body{
 .container h2{
     text-align:center;
     margin-bottom:20px;
-    color:#a80d0d;
+    color:#11998e;
 }
 
 .input-box{
@@ -56,7 +56,7 @@ body{
 }
 
 .input-box input:focus{
-    border-color:#4e54c8;
+    border-color:#11998e;
 }
 
 button{
@@ -64,19 +64,37 @@ button{
     padding:12px;
     border:none;
     border-radius:8px;
-    background:#0e712a;
+    background:#11998e;
     color:white;
     font-size:16px;
     cursor:pointer;
 }
 
 button:hover{
-    background:#850606;
+    background:#0d7f74;
+}
+
+table{
+    width:100%;
+    margin-top:20px;
+    border-collapse:collapse;
+}
+
+table th,
+table td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
+}
+
+table th{
+    background:#11998e;
+    color:white;
 }
 
 #message{
-    margin-top:15px;
     text-align:center;
+    margin-top:10px;
     font-weight:bold;
 }
 
@@ -87,55 +105,37 @@ button:hover{
 
 <div class="container">
 
-    <h2>Student Signup</h2>
+    <h2>Grocery List</h2>
 
-    <form id="signupForm">
+    <div class="input-box">
+        <label>Item Name</label>
+        <input type="text" id="item_name">
+    </div>
 
-        <div class="input-box">
-            <label>Student Name</label>
-            <input type="text" id="student_name" required>
-        </div>
+    <div class="input-box">
+        <label>Quantity</label>
+        <input type="text" id="quantity">
+    </div>
 
-        <div class="input-box">
-            <label>Email</label>
-            <input type="email" id="email" required>
-        </div>
+    <div class="input-box">
+        <label>Price</label>
+        <input type="number" id="price">
+    </div>
 
-        <div class="input-box">
-            <label>Password</label>
-            <input type="password" id="password" required>
-        </div>
-
-        <div class="input-box">
-            <label>Address</label>
-            <input type="text" id="address" required>
-        </div>
-
-        <div class="input-box">
-            <label>Branch</label>
-            <input type="text" id="branch" required>
-        </div>
-
-        <div class="input-box">
-            <label>Year</label>
-            <input type="text" id="year" required>
-        </div>
-
-        <div class="input-box">
-            <label>Mobile Number</label>
-            <input type="text" id="mobile_number" required>
-        </div>
-
-        <div class="input-box">
-            <label>Date of Birth</label>
-            <input type="date" id="date_of_birth" required>
-        </div>
-
-        <button type="submit">Sign Up</button>
-
-    </form>
+    <button onclick="addGrocery()">Add Grocery</button>
 
     <div id="message"></div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody id="groceryTable"></tbody>
+    </table>
 
 </div>
 
@@ -159,54 +159,86 @@ const supabaseClient = supabase.createClient(
 );
 
 // =======================================
-// FORM SUBMIT
+// LOAD GROCERY ITEMS
 // =======================================
 
-const form = document.getElementById("signupForm");
+async function loadGroceries(){
 
-form.addEventListener("submit", async (e) => {
-
-    e.preventDefault();
-
-    const student_name = document.getElementById("student_name").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const address = document.getElementById("address").value;
-    const branch = document.getElementById("branch").value;
-    const year = document.getElementById("year").value;
-    const mobile_number = document.getElementById("mobile_number").value;
-    const date_of_birth = document.getElementById("date_of_birth").value;
-
-    // Insert Data
     const { data, error } = await supabaseClient
-        .from("students")
-        .insert([
-            {
-                student_name: student_name,
-                email: email,
-                password: password,
-                address: address,
-                branch: branch,
-                year: year,
-                mobile_number: mobile_number,
-                date_of_birth: date_of_birth
-            }
-        ]);
+        .from("groceries")
+        .select("*")
+        .order("id", { ascending:false });
+
+    const table = document.getElementById("groceryTable");
+
+    table.innerHTML = "";
+
+    if(data){
+
+        data.forEach(item => {
+
+            table.innerHTML += `
+                <tr>
+                    <td>${item.item_name}</td>
+                    <td>${item.quantity}</td>
+                    <td>₹${item.price}</td>
+                </tr>
+            `;
+        });
+    }
+}
+
+// =======================================
+// ADD GROCERY
+// =======================================
+
+async function addGrocery(){
+
+    const item_name = document.getElementById("item_name").value;
+    const quantity = document.getElementById("quantity").value;
+    const price = document.getElementById("price").value;
 
     const message = document.getElementById("message");
 
-    if(error){
+    if(item_name==="" || quantity==="" || price===""){
         message.style.color = "red";
-        message.innerHTML = "Signup Failed";
-        console.log(error);
-    }
-    else{
-        message.style.color = "green";
-        message.innerHTML = "Signup Successful";
-        form.reset();
+        message.innerHTML = "Please Fill All Fields";
+        return;
     }
 
-});
+    const { data, error } = await supabaseClient
+        .from("groceries")
+        .insert([
+            {
+                item_name:item_name,
+                quantity:quantity,
+                price:price
+            }
+        ]);
+
+    if(error){
+
+        message.style.color = "red";
+        message.innerHTML = "Failed To Add Grocery";
+
+    }else{
+
+        message.style.color = "green";
+        message.innerHTML = "Grocery Added Successfully";
+
+        document.getElementById("item_name").value = "";
+        document.getElementById("quantity").value = "";
+        document.getElementById("price").value = "";
+
+        loadGroceries();
+    }
+}
+
+// =======================================
+// INITIAL LOAD
+// =======================================
+
+loadGroceries();
 
 </script>
 
