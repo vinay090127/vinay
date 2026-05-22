@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Signup</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,#d50c1d,#8f94fb);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+}
+
+.container{
+    width:420px;
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.3);
+}
+
+.container h2{
+    text-align:center;
+    margin-bottom:20px;
+    color:#a80d0d;
+}
+
+.input-box{
+    margin-bottom:15px;
+}
+
+.input-box label{
+    display:block;
+    margin-bottom:5px;
+    font-weight:bold;
+}
+
+.input-box input{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    outline:none;
+}
+
+.input-box input:focus{
+    border-color:#4e54c8;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:#0e712a;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#850606;
+}
+
+#message{
+    margin-top:15px;
+    text-align:center;
+    font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Student Signup</h2>
+
+    <form id="signupForm">
+
+        <div class="input-box">
+            <label>Student Name</label>
+            <input type="text" id="student_name" required>
+        </div>
+
+        <div class="input-box">
+            <label>Email</label>
+            <input type="email" id="email" required>
+        </div>
+
+        <div class="input-box">
+            <label>Password</label>
+            <input type="password" id="password" required>
+        </div>
+
+        <div class="input-box">
+            <label>Address</label>
+            <input type="text" id="address" required>
+        </div>
+
+        <div class="input-box">
+            <label>Branch</label>
+            <input type="text" id="branch" required>
+        </div>
+
+        <div class="input-box">
+            <label>Year</label>
+            <input type="text" id="year" required>
+        </div>
+
+        <div class="input-box">
+            <label>Mobile Number</label>
+            <input type="text" id="mobile_number" required>
+        </div>
+
+        <div class="input-box">
+            <label>Date of Birth</label>
+            <input type="date" id="date_of_birth" required>
+        </div>
+
+        <button type="submit">Sign Up</button>
+
+    </form>
+
+    <div id="message"></div>
+
+</div>
+
+<!-- Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script>
+
+// =======================================
+// SUPABASE CONFIG
+// =======================================
+
+const SUPABASE_URL = "https://frwbimnghfoidnjnfuhn.supabase.co";
+
+const SUPABASE_ANON_KEY = "sb_publishable_uSleMs6GiwmOuKIH9m4xOA__pc2sq_q";
+
+// Create Client
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
+
+// =======================================
+// FORM SUBMIT
+// =======================================
+
+const form = document.getElementById("signupForm");
+
+form.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    const student_name = document.getElementById("student_name").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const address = document.getElementById("address").value;
+    const branch = document.getElementById("branch").value;
+    const year = document.getElementById("year").value;
+    const mobile_number = document.getElementById("mobile_number").value;
+    const date_of_birth = document.getElementById("date_of_birth").value;
+
+    // Insert Data
+    const { data, error } = await supabaseClient
+        .from("students")
+        .insert([
+            {
+                student_name: student_name,
+                email: email,
+                password: password,
+                address: address,
+                branch: branch,
+                year: year,
+                mobile_number: mobile_number,
+                date_of_birth: date_of_birth
+            }
+        ]);
+
+    const message = document.getElementById("message");
+
+    if(error){
+        message.style.color = "red";
+        message.innerHTML = "Signup Failed";
+        console.log(error);
+    }
+    else{
+        message.style.color = "green";
+        message.innerHTML = "Signup Successful";
+        form.reset();
+    }
+
+});
+
+</script>
+
+</body>
+</html>
